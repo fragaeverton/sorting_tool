@@ -5,14 +5,15 @@ import java.util.*;
 public class Main {
     public static void main(final String[] args) {
         Scanner scanner = new Scanner(System.in);
-        ArrayList<Long> collection = new ArrayList<>();
+        List<Long> numbers = new ArrayList<>();
         while (scanner.hasNextLong()) {
             long number = scanner.nextLong();
-            collection.add(number);
+            numbers.add(number);
         }
-        long max = Collections.max(collection);
-        long frequency = Collections.frequency(collection, max);
-        System.out.println("Total numbers: " + collection.size() + ".");
-        System.out.println("The greatest number: " + max + " (" + frequency + " time(s))");
+
+        long greatest = Collections.max(numbers);
+        long times = Collections.frequency(numbers, greatest);
+        System.out.printf("Total numbers: %d.", numbers.size());
+        System.out.printf("The greatest number: %d (%d time(s)).", greatest, times);
     }
 }
