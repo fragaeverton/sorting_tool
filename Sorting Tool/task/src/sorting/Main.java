@@ -5,18 +5,24 @@ import java.util.*;
 public class Main {
     final static Scanner scanner = new Scanner(System.in);
     public static void main(final String[] args) {
-        for(int i = 1; i < args.length; i+=2) {
-            switch (args[i]) {
-                case "long":
-                    processLong();
-                    break;
-                case "line":
-                    processLine();
-                    break;
-                case "word":
-                    processWords();
-                    break;
+        if (args.length > 0) {
+            if (Arrays.asList(args).contains("-sortIntegers")) {
+                processIntegers();
+            }else if ("-dataType".equals(args[0])){
+                switch (args[1]) {
+                    case "long":
+                        processLong();
+                        break;
+                    case "line":
+                        processLine();
+                        break;
+                    case "word":
+                        processWords();
+                        break;
+                }
             }
+
+
         }
     }
 
@@ -60,6 +66,24 @@ public class Main {
         System.out.printf("Total words: %d\n",wordsList.size());
         System.out.printf("The longest word: %s (%d times(s), %.0f%%).\n",longestWord,count,percent);
 
+    }
+
+    public static void processIntegers() {
+        List<Integer> integerList = new ArrayList<>();
+        while (scanner.hasNextInt()) {
+            integerList.add(scanner.nextInt());
+        }
+        integerList.sort(Comparator.naturalOrder());
+        System.out.printf("Total numbers: %d.\n",integerList.size());
+        System.out.println("Sorted data: "+ getString(integerList));
+    }
+
+    public static StringBuilder getString(List<Integer> IntCollection){
+        StringBuilder myString = new StringBuilder();
+        for(int i : IntCollection){
+            myString.append(i + " ");
+        }
+        return myString;
     }
 
 
