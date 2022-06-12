@@ -1,89 +1,183 @@
 package sorting;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
 
 public class Main {
-    final static Scanner scanner = new Scanner(System.in);
+
+    private static Scanner scanner;
+
     public static void main(final String[] args) {
-        if (args.length > 0) {
-            if (Arrays.asList(args).contains("-sortIntegers")) {
-                processIntegers();
-            }else if ("-dataType".equals(args[0])){
-                switch (args[1]) {
-                    case "long":
-                        processLong();
-                        break;
-                    case "line":
-                        processLine();
-                        break;
-                    case "word":
-                        processWords();
-                        break;
-                }
-            }
+        scanner = new Scanner(System.in);
+        List<String> arguments = Arrays.asList(args);
+
+        String dataType = "word";
+        int dtIndex = arguments.indexOf("-dataType");
+        if (dtIndex >= 0) {
+            dataType = arguments.get(dtIndex + 1);
+        }
 
 
+        String sortingType = "natural";
+        int stIndex = arguments.indexOf("-sortingType");
+        if (stIndex >=0) {
+            sortingType = arguments.get(stIndex + 1);
+        }
+
+        switch(sortingType) {
+            case "natural":
+                naturalSorting(dataType);
+                break;
+            case "byCount":
+                sortByCount(dataType);
+                break;
+        }
+
+        scanner.close();
+    }
+
+    private static void naturalSorting(String dataType) {
+        switch (dataType) {
+            case "long":
+                sortNumbers();
+                break;
+            case "word":
+                sortWords();
+                break;
+            case "line":
+                sortLines();
+                break;
         }
     }
 
-    public static void processLong() {
-        List<Long> numberList = new ArrayList<>();
-        while (scanner.hasNextLong()) {
-            long number = scanner.nextLong();
-            numberList.add(number);
+    private static void sortByCount(String dataType) {
+        switch (dataType) {
+            case "long":
+                sortLongsByCount();
+                break;
+            case "word":
+                sortWordsByCount();
+                break;
+            case "line":
+                sortLinesByCount();
+                break;
         }
-        long max = Collections.max(numberList);
-        long count = Collections.frequency(numberList,max);
-        double percent = ((double) count / numberList.size()) * 100;
-
-        System.out.printf("Total numbers: %d.\n",numberList.size());
-        System.out.printf("The greatest number: %d (%d time(s), %.0f%%).\n",max,count,percent);
     }
 
-    public static void processLine() {
-        List<String> lineList = new ArrayList<>();
-        while (scanner.hasNextLine()) {
-            lineList.add(scanner.nextLine());
-        }
-        int totalLines = lineList.size();
-        String longestLine = Collections.max(lineList,Comparator.comparing(String::length));
-        int count = Collections.frequency(lineList,longestLine);
-        double percent = ((double) count / lineList.size()) * 100;
-        System.out.printf("Total lines: %d\n",totalLines);
-        System.out.printf("The longest line:\n%s\n",longestLine);
-        System.out.printf("(%d times(s), %.0f%%).\n",count,percent);
-    }
-
-    public static void processWords() {
-        List<String> wordsList = new ArrayList<>();
+    private static void sortLongsByCount() {
+        List<Long> numbers = new ArrayList<>();
         while (scanner.hasNext()) {
-            wordsList.add(scanner.next());
+            numbers.add(scanner.nextLong());
         }
 
-        String longestWord = Collections.max(wordsList,Comparator.comparing(String::length));
-        int count = Collections.frequency(wordsList,longestWord);
-        double percent = ((double) count / wordsList.size()) * 100;
-        System.out.printf("Total words: %d\n",wordsList.size());
-        System.out.printf("The longest word: %s (%d times(s), %.0f%%).\n",longestWord,count,percent);
+        Map<Long, Integer> valueFrequency = new HashMap<>();
+        numbers.forEach(number -> valueFrequency.putIfAbsent(number, Collections.frequency(numbers, number)));
 
+        List<Map.Entry<Long, Integer>> sortedList = new ArrayList<>(valueFrequency.entrySet());
+        sortedList.sort(Map.Entry.comparingByValue());
+
+
+        System.out.printf("Total numbers: %d.\n", numbers.size());
+        sortedList.forEach(entry -> {
+            int percentage = (int) (((double) entry.getValue() / (double) numbers.size()) * 100);
+            System.out.println(entry.getKey() + ": " + entry.getValue()  + " time(s), " + percentage + "%");
+        });
     }
 
-    public static void processIntegers() {
-        List<Integer> integerList = new ArrayList<>();
-        while (scanner.hasNextInt()) {
-            integerList.add(scanner.nextInt());
+    private static void sortWordsByCount() {
+        List<String> words = new ArrayList<>();
+        while (scanner.hasNext()) {
+            words.add(scanner.next());
         }
-        integerList.sort(Comparator.naturalOrder());
-        System.out.printf("Total numbers: %d.\n",integerList.size());
-        System.out.println("Sorted data: "+ getString(integerList));
+
+        Map<String, Integer> wordFrequency = new HashMap<>();
+        words.forEach(word -> wordFrequency.putIfAbsent(word, Collections.frequency(words, word)));
+
+        List<Map.Entry<String, Integer>> sortedList = new ArrayList<>(wordFrequency.entrySet());
+        Comparator<Map.Entry<String, Integer>> comparator0 = Map.Entry.comparingByValue();
+        Comparator<Map.Entry<String, Integer>> comparator1 = Map.Entry.comparingByKey();
+
+        sortedList.sort(comparator0.thenComparing(comparator1));
+
+        System.out.printf("Total words: %d.\n", words.size());
+        sortedList.forEach(entry -> {
+            int percentage = (int) (((double) entry.getValue() / (double) words.size()) * 100);
+            System.out.println(entry.getKey() + ": " + entry.getValue()  + " time(s), " + percentage + "%");
+        });
     }
 
-    public static StringBuilder getString(List<Integer> IntCollection){
-        StringBuilder myString = new StringBuilder();
-        for(int i : IntCollection){
-            myString.append(i + " ");
+    private static void sortLinesByCount() {
+        List<String> lines = new ArrayList<>();
+        while (scanner.hasNext()) {
+            lines.add(scanner.nextLine());
         }
-        return myString;
+
+        Map<String, Integer> lineFrequency = new HashMap<>();
+        lines.forEach(line -> lineFrequency.putIfAbsent(line, Collections.frequency(lines, line)));
+
+        List<Map.Entry<String, Integer>> sortedList = new ArrayList<>(lineFrequency.entrySet());
+        Comparator<Map.Entry<String, Integer>> comparator0 = Map.Entry.comparingByValue();
+        Comparator<Map.Entry<String, Integer>> comparator1 = Map.Entry.comparingByKey();
+
+        sortedList.sort(comparator0.thenComparing(comparator1));
+
+
+        System.out.printf("Total lines: %d.\n", lines.size());
+        sortedList.forEach(entry -> {
+            int percentage = (int) (((double) entry.getValue() / (double) lines.size()) * 100);
+            System.out.println(entry.getKey() + ": " + entry.getValue()  + " time(s), " + percentage + "%");
+        });
+    }
+
+    private static void sortNumbers() {
+        List<Long> numbers = new ArrayList<>();
+        while (scanner.hasNext()) {
+            long number = scanner.nextLong();
+            numbers.add(number);
+        }
+
+        numbers.sort(Long::compare);
+        StringBuilder res = new StringBuilder();
+        numbers.forEach(number -> res.append(number).append(" "));
+
+        System.out.println("Total numbers: " + numbers.size() + ".\n" +
+                "Sorted data: " + res);
+    }
+
+    private static void sortWords() {
+        List<String> words = new ArrayList<>();
+
+        while (scanner.hasNext()) {
+            words.add(scanner.next());
+        }
+
+        words.sort(String::compareTo);
+        StringBuilder res = new StringBuilder();
+        words.forEach(word -> res.append(word).append(" "));
+
+        System.out.println("Total words: " + words.size() + ".\n" +
+                "Sorted data: " + res);
+    }
+
+    private static void sortLines() {
+        List<String> lines = new ArrayList<>();
+
+        while (scanner.hasNextLine()) {
+            lines.add(scanner.nextLine());
+        }
+
+        lines.sort(String::compareTo);
+        StringBuilder res = new StringBuilder();
+        lines.forEach(line -> res.append(line).append("\n"));
+
+        System.out.println("Total lines: " + lines.size() + ".\n" +
+                "Sorted data:\n" + res);
     }
 
 
