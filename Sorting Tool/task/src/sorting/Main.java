@@ -1,5 +1,8 @@
 package sorting;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,22 +15,68 @@ import java.util.Scanner;
 public class Main {
 
     private static Scanner scanner;
+    private static PrintWriter printWriter;
+    private static boolean printToFile;
+
 
     public static void main(final String[] args) {
-        scanner = new Scanner(System.in);
         List<String> arguments = Arrays.asList(args);
+        List<String> validArguments = List.of("-sortingType", "-dataType",
+                "natural", "byCount",
+                "long", "word", "line",
+                "-inputFile", "-outputFile");
+        arguments.forEach(arg -> {
+            if (!validArguments.contains(arg)) {
+                System.out.println("\"" + arg + "\" is not a valid parameter. It will be skipped.");
+            }
+        });
+
+        if (arguments.contains("-inputFile")) {
+            int indexF = arguments.indexOf("-inputFile");
+            String fileName = arguments.get(indexF + 1);
+            try {
+                scanner = new Scanner(new File(fileName));
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        } else {
+            scanner = new Scanner(System.in);
+        }
+
+        if (arguments.contains("-outputFile")) {
+            int indexF = arguments.indexOf("-outputFile");
+            String fileName = arguments.get(indexF + 1);
+            try {
+                printWriter = new PrintWriter(fileName);
+                printToFile = true;
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        } else {
+            printToFile = false;
+        }
 
         String dataType = "word";
         int dtIndex = arguments.indexOf("-dataType");
         if (dtIndex >= 0) {
-            dataType = arguments.get(dtIndex + 1);
+            try{
+                dataType = arguments.get(dtIndex + 1);
+            } catch (IndexOutOfBoundsException exception) {
+                System.out.println("No data type defined!");
+                return;
+            }
         }
 
 
         String sortingType = "natural";
         int stIndex = arguments.indexOf("-sortingType");
         if (stIndex >=0) {
-            sortingType = arguments.get(stIndex + 1);
+            try{
+                sortingType = arguments.get(stIndex + 1);
+            } catch (IndexOutOfBoundsException exception) {
+                System.out.println("No sorting type defined!");
+                return;
+            }
         }
 
         switch(sortingType) {
@@ -83,10 +132,19 @@ public class Main {
         sortedList.sort(Map.Entry.comparingByValue());
 
 
-        System.out.printf("Total numbers: %d.\n", numbers.size());
+        if (printToFile) {
+            printWriter.printf("Total numbers: %d.\n", numbers.size());
+        } else {
+            System.out.printf("Total numbers: %d.\n", numbers.size());
+        }
         sortedList.forEach(entry -> {
             int percentage = (int) (((double) entry.getValue() / (double) numbers.size()) * 100);
-            System.out.println(entry.getKey() + ": " + entry.getValue()  + " time(s), " + percentage + "%");
+            String output = entry.getKey() + ": " + entry.getValue() + " time(s), " + percentage + "%";
+            if (printToFile) {
+                printWriter.println(output);
+            } else {
+                System.out.println(output);
+            }
         });
     }
 
@@ -105,10 +163,19 @@ public class Main {
 
         sortedList.sort(comparator0.thenComparing(comparator1));
 
-        System.out.printf("Total words: %d.\n", words.size());
+        if (printToFile) {
+            printWriter.printf("Total words: %d.\n", words.size());
+        } else {
+            System.out.printf("Total words: %d.\n", words.size());
+        }
         sortedList.forEach(entry -> {
             int percentage = (int) (((double) entry.getValue() / (double) words.size()) * 100);
-            System.out.println(entry.getKey() + ": " + entry.getValue()  + " time(s), " + percentage + "%");
+            String output = entry.getKey() + ": " + entry.getValue() + " time(s), " + percentage + "%";
+            if (printToFile) {
+                printWriter.println(output);
+            } else {
+                System.out.println(output);
+            }
         });
     }
 
@@ -127,11 +194,19 @@ public class Main {
 
         sortedList.sort(comparator0.thenComparing(comparator1));
 
-
-        System.out.printf("Total lines: %d.\n", lines.size());
+        if (printToFile) {
+            printWriter.printf("Total lines: %d.\n", lines.size());
+        } else {
+            System.out.printf("Total lines: %d.\n", lines.size());
+        }
         sortedList.forEach(entry -> {
             int percentage = (int) (((double) entry.getValue() / (double) lines.size()) * 100);
-            System.out.println(entry.getKey() + ": " + entry.getValue()  + " time(s), " + percentage + "%");
+            String output = entry.getKey() + ": " + entry.getValue() + " time(s), " + percentage + "%";
+            if (printToFile) {
+                printWriter.println(output);
+            } else {
+                System.out.println(output);
+            }
         });
     }
 
@@ -146,8 +221,13 @@ public class Main {
         StringBuilder res = new StringBuilder();
         numbers.forEach(number -> res.append(number).append(" "));
 
-        System.out.println("Total numbers: " + numbers.size() + ".\n" +
-                "Sorted data: " + res);
+        String output = "Total numbers: " + numbers.size() + ".\n" +
+                "Sorted data: " + res;
+        if (printToFile) {
+            printWriter.println(output);
+        } else {
+            System.out.println(output);
+        }
     }
 
     private static void sortWords() {
@@ -161,8 +241,13 @@ public class Main {
         StringBuilder res = new StringBuilder();
         words.forEach(word -> res.append(word).append(" "));
 
-        System.out.println("Total words: " + words.size() + ".\n" +
-                "Sorted data: " + res);
+        String output = "Total words: " + words.size() + ".\n" +
+                "Sorted data: " + res;
+        if (printToFile) {
+            printWriter.println(output);
+        } else {
+            System.out.println(output);
+        }
     }
 
     private static void sortLines() {
@@ -176,9 +261,13 @@ public class Main {
         StringBuilder res = new StringBuilder();
         lines.forEach(line -> res.append(line).append("\n"));
 
-        System.out.println("Total lines: " + lines.size() + ".\n" +
-                "Sorted data:\n" + res);
+        String output = "Total lines: " + lines.size() + ".\n" +
+                "Sorted data:\n" + res;
+        if (printToFile) {
+            printWriter.println(output);
+        } else {
+            System.out.println(output);
+        }
     }
-
 
 }
